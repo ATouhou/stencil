@@ -6,7 +6,7 @@ import { getStylesMeta } from './styles-meta';
 import * as ts from 'typescript';
 
 
-export function getComponentDecoratorMeta(diagnostics: d.Diagnostic[], checker: ts.TypeChecker, node: ts.ClassDeclaration): d.ComponentMeta | undefined {
+export function getComponentDecoratorMeta(diagnostics: d.Diagnostic[], checker: ts.TypeChecker, node: ts.ClassDeclaration, moduleExports: ts.Symbol[]): d.ComponentMeta | undefined {
   if (!node.decorators) {
     return undefined;
   }
@@ -22,7 +22,17 @@ export function getComponentDecoratorMeta(diagnostics: d.Diagnostic[], checker: 
     throw new Error(`tag missing in component decorator: ${JSON.stringify(componentOptions, null, 2)}`);
   }
 
+  // check if class has more than one decorator
+  if (node.decorators.length > 1) {
+    throw new Error(`@Component({ tag: "${componentOptions.tag}"}) can not be decorated with more decorators at the same time`);
+  }
+
   const symbol = checker.getSymbolAtLocation(node.name);
+
+  // check if class is exported
+  if (!moduleExports.includes(checker.getExportSymbolOfSymbol(symbol))) {
+    throw new Error(`Missing export in @Component({ tag: "${componentOptions.tag}" })`);
+  }
 
   const cmpMeta: d.ComponentMeta = {
     tagNameMeta: componentOptions.tag,
