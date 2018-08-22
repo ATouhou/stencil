@@ -141,7 +141,10 @@ function transpileTypedConfig(sourceText: string, filePath: string) {
     compilerOptions: {
       module: ts.ModuleKind.CommonJS,
       moduleResolution: ts.ModuleResolutionKind.NodeJs,
-      target: ts.ScriptTarget.ES5
+      esModuleInterop: true,
+      isolatedModules: true,
+      skipLibCheck: true,
+      target: ts.ScriptTarget.ES5,
     },
     reportDiagnostics: false
   };
